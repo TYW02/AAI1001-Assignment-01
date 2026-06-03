@@ -266,10 +266,10 @@ activation_tbl |>
 
 # Task 3: Reflection on the Use of GenAI
 
-```{r}
+Our teams used a combination of ChatGPT, Claude and Gemini. ChatGPT allows us to uploaded sources into a project, and before it answers our prompt it will check through the contents in the project source. We think that this function is very useful so that the prompts will be somewhat related to what we learn in class. We also used different Gen AI tools to cross check our work, and after that check through it ourselves to compare and see which solution makes more sense. One issue that our group faced when using ChatGPT was that it gave us "Too much" help in a sense where it assumed that we needed extra features when all we asked was for it to check if the code was able to clean the data (example: task 1.1). Another issue was that GPT kept re-defining the code and functions, compared to when you code yourself, you will already know that you have defined the function beforehand and thus will not have to define it moving on.
 
-```
+During this assessment, our teams ran into merge conflicts error, and GPT was able to guide us to the solutions to fix this. Thus, this was useful because it allowed us to resolve the issue quickly and continue our work so that we can meet the deadline on time.
 
-```{r}
+Overall, GenAI was helpful for debugging, checking logic, and understanding errors, but we still had to evaluate its suggestions so as to ensure that our final work matched the assignment requirements.
 
-```
+In the future, we think that AI will serve as permanent co-pilot assistants to people writing code, whether for data engineering or not. We think that it is important to still know what the fundamentals are, so that we are able to check and validate the outputs given to use by AI as it might not always be correct

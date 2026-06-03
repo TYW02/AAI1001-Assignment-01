@@ -14,6 +14,50 @@ library(tidyverse)
 
 ## Cleaning the Data
 
+```{r}
+clean_up_wb_csv <- function(
+    in_file_name,
+    out_file_name) {
+  
+  # Read the raw World Bank CSV file, skipping the metadata rows
+  wb_clean <- readr::read_csv(
+    in_file_name,
+    skip = 4,
+    na = c("", ".."),
+    show_col_types = FALSE
+  )
+  
+  # Remove empty/unnamed columns created by the CSV import
+  wb_clean <- wb_clean |>
+    dplyr::select(-dplyr::starts_with("..."))
+  
+  # Rename the main columns so they are easier to use in R
+  wb_clean <- wb_clean |>
+    dplyr::rename(
+      country_name = `Country Name`,
+      country_code = `Country Code`,
+      indicator_name = `Indicator Name`,
+      indicator_code = `Indicator Code`
+    )
+  
+  # Write the cleaned dataset to the output file
+  readr::write_csv(
+    wb_clean,
+    out_file_name
+  )
+  
+  # Return the cleaned dataset as well
+  return(wb_clean)
+}
+```
+
+```{r}
+population <- clean_up_wb_csv(
+  in_file_name = "data/world_bank_total_population/API_SP.POP.TOTL_DS2_en_csv_v2_267553.csv",
+  out_file_name = "data/world_bank_total_population/population.csv"
+)
+```
+
 ## Importing the Data to RStudio
 
 ## Removing Rows not Pertaining to Countries

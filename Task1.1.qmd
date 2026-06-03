@@ -46,3 +46,9 @@ population <- clean_up_wb_csv(
   out_file_name = "data/world_bank_total_population/population.csv"
 )
 ```
+```{r}
+indicator <- clean_up_wb_csv(
+  in_file_name = "data/indicators/emissions.csv",
+  out_file_name = "data/indicators/indicator.csv"
+)
+```

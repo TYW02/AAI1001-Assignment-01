@@ -82,19 +82,15 @@ population <- read_csv("data/world_bank_total_population/population.csv", show_c
 ## Removing Rows not Pertaining to Countries
 
 ```{r}
-
-names(country_codes)
+country_codes <- read_csv("data/country_codes.csv", show_col_types = FALSE)
 ```
 
 ```{r}
-indicator <-read_csv("data/indicators/emissions.csv", skip = 4)
+indicator <- read_csv("data/indicators/emissions.csv", skip = 4, show_col_types = FALSE)
 ```
 
 ```{r}
-population <- read_csv(
-  "data/world_bank_total_population/API_SP.POP.TOTL_DS2_en_csv_v2_267553.csv",
-  skip = 4
-)
+population <- read_csv("data/world_bank_total_population/population.csv", show_col_types = FALSE) 
 ```
 
 Refer to @fig-my-image for the table view.
@@ -110,7 +106,9 @@ population_reduced <- population |>
 
 indicator_reduced <- indicator |>
   semi_join(country_codes, by = c("Country Code" = "country_code"))
+```
 
+```{r}
 nrow(population_reduced)
 nrow(indicator_reduced)
 ```
@@ -121,9 +119,150 @@ nrow(indicator_reduced)
 
 ## Visualizing `swish()` Activation Function and its Gradient
 
+```{r}
+library(dplyr)
+library(tidyr)
+library(tibble)
+library(ggplot2)
+```
+
+```{r}
+#| label: fig-swish
+#| fig-cap: "Swish Activation Function"
+#| fig-width: 7
+#| fig-height: 4
+
+# Define the Swish activation function
+swish <- function(x) {
+  x / (1 + exp(-x))
+}
+
+# Generate data and plot
+x <- -10:10
+y <- swish(x)
+tbl_swish <- tibble(x, y)
+
+ggplot(tbl_swish, aes(x, y)) +
+  geom_line(color = "darkblue", linewidth = 1) +
+  labs(x = "x", y = "swish(x)")
+```
+
+```{r}
+#| label: fig-d-swish
+#| fig-cap: "Gradient of Swish Activation Function"
+#| fig-width: 7
+#| fig-height: 4
+
+
+# Define the derivative (gradient) of the swish function
+# f'(x) = sigma(x) + swish(x) * (1 - sigma(x))
+d_swish <- function(x) {
+  sig <- 1 / (1 + exp(-x))
+  sig + swish(x) * (1 - sig)
+}
+
+# Execute the test call and visualize
+x <- -10:10
+y <- d_swish(x)
+tbl_d_swish <- tibble(x, y)
+
+ggplot(tbl_d_swish, aes(x, y)) +
+  geom_line(color = "darkblue", linewidth = 1) +
+  labs(x = "x", y = "d_swish(x)")
+```
+
+> ReLU is highly efficient because its simple step-function gradient (0 or 1) avoids complex math, but its hard zero for negative inputs can cause dead neurons. In contrast, Swish’s non-zero gradient for negative values prevents dead neurons, improving performance in deep networks at the cost of higher computational overhead.
+
 ## Toy Examples Calling `swish()` and `relu()`
 
+```{r}
+# 1. Define the ReLU function
+relu <- function(x) {
+  pmax(0, x)
+}
+
+# 2. Seed calculation using Student ID
+seed_numbers <- c(2500466, 2500668, 2500737, 2500853, 2501043)
+my_seed <- median(seed_numbers)
+set.seed(my_seed)
+
+# 3. Generate the vector x from a uniform distribution (-10 to 10)
+x <- runif(100, min = -10, max = 10)
+
+# 4. Create the initial tibble with rounded values
+activation_tbl <- tibble(
+  x = x,
+  swish_x = round(swish(x), 2),
+  relu_x = round(relu(x), 2)
+)
+
+head(activation_tbl, 10)
+
+# 5. Add the is_dead logical column
+activation_tbl <- activation_tbl |>
+  mutate(is_dead = (relu_x == 0))
+
+head(activation_tbl, 10)
+
+# 6. One-row summary table
+summary_tbl <- activation_tbl |>
+  summarise(
+    relu_dead_count = sum(is_dead),
+    swish_mean = mean(swish_x),
+    swish_sd = sd(swish_x),
+    relu_mean = mean(relu_x),
+    relu_sd = sd(relu_x)
+  )
+
+summary_tbl
+```
+
+> These statistics support the claim that "swish()" prevents dead neurons. In the simulation, nearly half of the "relu_x" outputs evaluated to exactly zero, killing the gradient. Conversely, "swish_x" produces small negative values, allowing gradients to continuously propagate backward.
+
+```{r}
+# 7. Reshaping tibble into long formamt
+long_activation_tbl <- activation_tbl |>
+  select(x, swish_x, relu_x) |> # Not using is_dead column
+  pivot_longer(
+    cols = c(swish_x, relu_x),
+    names_to = "function_name",
+    values_to = "activation_value"
+  )
+
+head(long_activation_tbl, 10)
+
+# 8. Final grouped summary table
+final_summary <- long_activation_tbl |>
+  group_by(function_name) |>
+  summarise(
+    mean = mean(activation_value),
+    sd = sd(activation_value),
+    min = min(activation_value),
+    max = max(activation_value)
+  )
+
+final_summary
+```
+
 ## Exploring Other Activation Functions
+
+> Leaky ReLU is a modified version of the Rectified Linear Unit that allows a small, non-zero gradient when the unit is not active, preventing the dying neuron problem.
+
+```{r}
+# 1. Define Leaky ReLU activation function
+leaky_relu <- function(x) {
+  ifelse(x > 0, x, 0.01 * x)
+}
+
+# 2. Add the outputs as a new column
+activation_tbl <- activation_tbl |>
+  mutate(leaky_relu_x = round(leaky_relu(x), 2))
+
+# First 10 rows displayed
+activation_tbl |>
+  select(x, swish_x, relu_x, leaky_relu_x) |>
+  head(10)
+```
 
 # Task 3: Reflection on the Use of GenAI
 

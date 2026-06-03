@@ -1,0 +1,39 @@
+---
+title: "Week05_Assignment_01"
+format: html
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+```
+
+# Task 1: Analyzing Country-Level Statistics on Methane Emissions
+
+## About the Data
+
+## Cleaning the Data
+
+## Importing the Data to RStudio
+
+## Removing Rows not Pertaining to Countries
+
+## Analyzing Country-Level Data
+
+# Task 2: Activation Function Analysis
+
+## Visualizing `swish()` Activation Function and its Gradient
+
+## Toy Examples Calling `swish()` and `relu()`
+
+## Exploring Other Activation Functions
+
+# Task 3: Reflection on the Use of GenAI
+
+```{r}
+
+```
+
+```{r}
+
+```

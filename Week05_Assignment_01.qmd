@@ -12,6 +12,12 @@ library(tidyverse)
 
 ## About the Data
 
+> The datasets used in this analysis are from the World Bank and focus on two main indicators: **methane emissions** and **total population**. The main indicator we will be analysing is methane emissions, measured in **kilotonnes of CO₂ equivalent** under the indicator code `EN.ATM.METH.KT.CE`.
+>
+> According to the World Bank metadata, methane emissions refer to emissions arising from human activities, especially agriculture and industrial methane production. This is important to study because methane is a major greenhouse gas that contributes significantly to climate change, even though it is usually released in smaller quantities than carbon dioxide. By analysing methane emissions across countries and over time, we can better understand which countries or regions contribute more heavily to this form of environmental pressure.
+>
+> The population dataset, measured using the World Bank indicator `SP.POP.TOTL`, provides total population based on the by right definition, meaning it counts all residents regardless of legal status or citizenship, using midyear estimates. Studying population alongside methane emissions is useful because population size can affect total emissions, resource demand, agriculture, energy use, and industrial activity. Together, these datasets allow for a more meaningful analysis of environmental impact in relation to demographic size.
+
 ## Cleaning the Data
 
 ```{r}
@@ -65,10 +71,18 @@ indicator <- clean_up_wb_csv(
 
 ## Importing the Data to RStudio
 
+```{r}
+country_codes <- read_csv("data/country_codes.csv", show_col_types = FALSE)
+indicator <- read_csv("data/indicators/emissions.csv", skip = 4, show_col_types = FALSE)
+population <- read_csv("data/world_bank_total_population/population.csv", show_col_types = FALSE) 
+```
+
+![Figure 1](/images/clipboard-2973571940.png){#fig-my-image}
+
 ## Removing Rows not Pertaining to Countries
 
 ```{r}
-country_codes <- read_csv("data/country_codes.csv")
+
 names(country_codes)
 ```
 
@@ -82,6 +96,8 @@ population <- read_csv(
   skip = 4
 )
 ```
+
+Refer to @fig-my-image for the table view.
 
 ```{r}
 nrow(population)

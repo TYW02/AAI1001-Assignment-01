@@ -2,6 +2,11 @@
 title: "Task1.1"
 format: html
 ---
+You can use this paragraph in your report:
+
+The datasets used in this analysis are from the World Bank and focus on two main indicators: **methane emissions** and **total population**. The main indicator I will be analysing is methane emissions, measured in **kilotonnes of CO₂ equivalent** under the indicator code `EN.ATM.METH.KT.CE`. According to the World Bank metadata, methane emissions refer to emissions arising from human activities, especially agriculture and industrial methane production. This is important to study because methane is a major greenhouse gas that contributes significantly to climate change, even though it is usually released in smaller quantities than carbon dioxide. By analysing methane emissions across countries and over time, we can better understand which countries or regions contribute more heavily to this form of environmental pressure. The population dataset, measured using the World Bank indicator `SP.POP.TOTL`, provides total population based on the by right definition, meaning it counts all residents regardless of legal status or citizenship, using midyear estimates. Studying population alongside methane emissions is useful because population size can affect total emissions, resource demand, agriculture, energy use, and industrial activity. Together, these datasets allow for a more meaningful analysis of environmental impact in relation to demographic size.
+
+
 
 ```{r}
 clean_up_wb_csv <- function(
@@ -42,7 +47,7 @@ clean_up_wb_csv <- function(
 
 ```{r}
 population <- clean_up_wb_csv(
-  in_file_name = "data/world_bank_total_population/API_SP.POP.TOTL_DS2_en_csv_v2_267553.csv",
+  # in_file_name = "data/world_bank_total_population/API_SP.POP.TOTL_DS2_en_csv_v2_267553.csv",
   out_file_name = "data/world_bank_total_population/population.csv"
 )
 ```

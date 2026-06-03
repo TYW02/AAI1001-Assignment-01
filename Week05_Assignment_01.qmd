@@ -56,11 +56,48 @@ population <- clean_up_wb_csv(
   in_file_name = "data/world_bank_total_population/API_SP.POP.TOTL_DS2_en_csv_v2_267553.csv",
   out_file_name = "data/world_bank_total_population/population.csv"
 )
+
+indicator <- clean_up_wb_csv(
+  in_file_name = "data/indicators/emissions.csv",
+  out_file_name = "data/indicators/indicator.csv"
+)
 ```
 
 ## Importing the Data to RStudio
 
 ## Removing Rows not Pertaining to Countries
+
+```{r}
+country_codes <- read_csv("data/country_codes.csv")
+names(country_codes)
+```
+
+```{r}
+indicator <-read_csv("data/indicators/emissions.csv", skip = 4)
+```
+
+```{r}
+population <- read_csv(
+  "data/world_bank_total_population/API_SP.POP.TOTL_DS2_en_csv_v2_267553.csv",
+  skip = 4
+)
+```
+
+```{r}
+nrow(population)
+nrow(indicator)
+```
+
+```{r}
+population_reduced <- population |>
+  semi_join(country_codes, by = c("Country Code" = "country_code"))
+
+indicator_reduced <- indicator |>
+  semi_join(country_codes, by = c("Country Code" = "country_code"))
+
+nrow(population_reduced)
+nrow(indicator_reduced)
+```
 
 ## Analyzing Country-Level Data
 

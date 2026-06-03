@@ -102,7 +102,7 @@ nrow(indicator)
 
 ```{r}
 population_reduced <- population |>
-  semi_join(country_codes, by = c("Country Code" = "country_code"))
+  semi_join(country_codes, by = c("country_code" = "country_code"))
 
 indicator_reduced <- indicator |>
   semi_join(country_codes, by = c("Country Code" = "country_code"))
@@ -114,6 +114,127 @@ nrow(indicator_reduced)
 ```
 
 ## Analyzing Country-Level Data
+
+```{r}
+# Task 1.4 - Top 10 Countries by Indicator Value and Per Capita Analysis
+
+library(tidyverse)
+library(gt)
+
+# Read the cleaned data
+indicator <- read_csv("data/indicators/indicator.csv")
+population <- read_csv("data/world_bank_total_population/population.csv")
+country_codes <- read_csv("data/country_codes.csv")
+
+# Reshape indicator data from wide to long format
+indicator_long <- indicator |>
+  pivot_longer(
+    cols = matches("^[0-9]+$"),
+    names_to = "year",
+    values_to = "indicator_value"
+  ) |>
+  mutate(year = as.numeric(year)) |>
+  filter(!is.na(indicator_value))
+
+# Reshape population data from wide to long format
+population_long <- population |>
+  pivot_longer(
+    cols = matches("^[0-9]+$"),
+    names_to = "year",
+    values_to = "population"
+  ) |>
+  mutate(year = as.numeric(year)) |>
+  filter(!is.na(population)) |>
+  select(country_code, year, population)
+
+# Find the most recent year in the indicator data
+most_recent_year <- indicator_long |>
+  pull(year) |>
+  max()
+
+# 1.4.1 - Top 10 countries by indicator value (most recent year, with ties)
+top_countries <- indicator_long |>
+  filter(year == most_recent_year) |>
+  left_join(population_long |> filter(year == most_recent_year),
+            by = c("country_code", "year")) |>
+  filter(!is.na(indicator_value), !is.na(population)) |>
+  semi_join(country_codes, by = c("country_code" = "country_code")) |>
+  select(country_name, country_code, population, indicator_value) |>
+  mutate(
+    rank_by_population = dense_rank(desc(population)),
+    rank_by_indicator = dense_rank(desc(indicator_value))
+  ) |>
+  filter(rank_by_indicator <= 10) |>
+  arrange(desc(indicator_value), desc(population))
+
+# Display using gt for better formatting
+gt(top_countries)
+```
+
+```{r}
+# Make sure libraries are loaded
+library(tidyverse)
+library(gt)
+
+# 1.4.2 - Top 10 countries by indicator per capita (most recent year, with ties)
+
+indicator_per_capita <- indicator_long |>
+  filter(year == most_recent_year) |>
+  left_join(population_long |> filter(year == most_recent_year),
+            by = c("country_code", "year")) |>
+  filter(!is.na(indicator_value), !is.na(population)) |>
+  semi_join(country_codes, by = c("country_code" = "country_code")) |>
+  select(country_name, country_code, indicator_value, population) |>
+  mutate(
+    indicator_per_capita = indicator_value / population,
+    rank_per_capita = dense_rank(desc(indicator_per_capita))
+  ) |>
+  filter(rank_per_capita <= 10) |>
+  select(country_name, country_code, indicator_per_capita, rank_per_capita) |>
+  arrange(desc(indicator_per_capita))
+
+# Display using gt for better formatting
+gt(indicator_per_capita)
+```
+
+The top countries by absolute methane emissions largely align with expectations based on population size and economic development, with notable exceptions that reveal important patterns. China leads significantly with 9.49 million kilotons of emissions, followed by the United States and India, which collectively account for the majority of global methane output. However, the ranking by population (China, India, United States) versus by indicator value demonstrates that sheer population size does not perfectly predict emission levels. For instance, the United States ranks 3rd in population but 2nd in total emissions, suggesting higher per-capita emissions and greater industrial activity. When examining per-capita metrics, the rankings shift dramatically, revealing countries with disproportionately high or low emission intensities relative to their populations.
+
+This divergence between absolute and per-capita rankings underscores critical insights: wealthy, industrialized nations with smaller populations often have higher per-capita emissions due to energy-intensive economies, manufacturing, and resource extraction, while populous developing nations may have lower per-capita values despite high absolute totals. These differences reflect varying development stages, economic structures, and energy sources—wealthy nations rely more on fossil fuels and intensive agriculture, while developing nations may have less industrialization despite larger populations. Understanding both metrics is essential for climate policy, as it reveals where emission reduction efforts should target absolute numbers versus efficiency improvements.
+
+```{r}
+# 1.4.3 - Countries with above median population but below median per capita indicator
+
+# Calculate global medians for the most recent year
+all_data_recent <- indicator_long |>
+  filter(year == most_recent_year) |>
+  left_join(population_long |> filter(year == most_recent_year),
+            by = c("country_code", "year")) |>
+  filter(!is.na(indicator_value), !is.na(population)) |>
+  semi_join(country_codes, by = c("country_code" = "country_code")) |>
+  select(country_name, country_code, indicator_value, population) |>
+  mutate(indicator_per_capita = indicator_value / population)
+
+median_population <- median(all_data_recent$population, na.rm = TRUE)
+median_per_capita <- median(all_data_recent$indicator_per_capita, na.rm = TRUE)
+
+# Find countries with high population but low per capita indicator
+high_pop_low_capita <- all_data_recent |>
+  filter(population > median_population,
+         indicator_per_capita < median_per_capita) |>
+  select(country_name, country_code, population, indicator_per_capita) |>
+  arrange(desc(population))
+
+# Display summary statistics
+cat("Total number of countries with above median population and below median per capita indicator:",
+    nrow(high_pop_low_capita), "\n\n")
+
+# Display top 10 by population
+gt(head(high_pop_low_capita, 10))
+```
+
+The identification of countries with above-median populations but below-median per capita indicator values reveals a critical developmental and environmental pattern distinct from both previous rankings. These nations represent a unique challenge: while they contribute substantially to global totals due to sheer population size, their per-capita metrics suggest relatively lower emission intensities compared to wealthier, industrialized nations. This phenomenon indicates that these countries may be in early or mid-stages of industrialization, with developing infrastructure and lower energy consumption per person compared to developed economies. Alternatively, it could reflect economic structures reliant on agriculture or services rather than energy-intensive manufacturing. Compared to the absolute rankings (dominated by large industrial powers like China, USA, and India) and per-capita rankings (which tend to show wealthy developed nations), this group occupies a middle ground.
+
+For climate policy, these countries are particularly important: they have significant room for emissions growth as development progresses, yet currently maintain relatively low per-capita footprints. Without proper intervention and investment in clean energy infrastructure, these nations could become major emitters as their economies expand. This "large population, low intensity" profile suggests both vulnerability and opportunity—these countries need support to pursue sustainable development pathways rather than replicating the carbon-intensive industrialization models of today's highest emitters.
 
 # Task 2: Activation Function Analysis
 
